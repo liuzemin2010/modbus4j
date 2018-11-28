@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/beans 
+      http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+     http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+     http://www.springframework.org/schema/aop 
+     http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+     http://www.springframework.org/schema/context 
+     http://www.springframework.org/schema/context/spring-context-3.1.xsd
+     http://www.springframework.org/schema/util
+     http://www.springframework.org/schema/util/spring-util-3.1.xsd">
+	<description>Spring公共配置 </description>
+
+	<context:annotation-config />
+
+	<!--注解配置 -->
+	<aop:aspectj-autoproxy proxy-target-class="true">
+	</aop:aspectj-autoproxy>
+
+	<!-- 使用annotation 自动注册bean,并保证@Required,@Autowired的属性被注入 -->
+	<context:component-scan
+		base-package="com.net4iot.oss">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+	<!-- SpringHolder -->
+	<bean id="springContextHolder"
+		class="com.net4iot.oss.infra.utils.SpringContextHolder"
+		lazy-init="false" />
+
+
+	<bean id="dataSource"
+		class="com.net4iot.oss.infra.routingdb.routing.RoutingDataSource">
+		<property name="targetDataSources">
+			<map key-type="com.net4iot.oss.infra.routingdb.routing.DbType">
+				<entry key="MASTER" value-ref="dataSourceMaster" />
+			</map>
+		</property>
+		<property name="defaultTargetDataSource"
+			ref="dataSourceMaster" />
+	</bean>
+
+	<!-- BoneCP configuration -->
+	<bean id="dataSourceMaster"
+		class="com.jolbox.bonecp.BoneCPDataSource" destroy-method="close">
+		<!-- Connection Info -->
+		<!-- 数据库驱动 -->
+		<property name="driverClass" value="${jdbc.driver}" />
+		<!-- 相应驱动的jdbcUrl -->
+        <property name="jdbcUrl" value="${jdbc.urlMaster}" />
+		<!-- 数据库的用户名 -->
+		<property name="username" value="${jdbc.username}" />
+		<!-- 数据库的密码 -->
+		<property name="password" value="${jdbc.password}" />
+		<!-- Connection Pooling Info -->
+		<!-- 检查数据库连接池中空闲连接的间隔时间，单位是分，默认值：240，如果要取消则设置为0 -->
+
+		<!-- 每次去拿数据库连接的时候一次性要拿几个,默认值：2 -->
+		<property name="acquireIncrement"
+			value="${jdbc.acquireIncrement}" />
+
+		<!-- 获取连接的时候最大的等待时间，默认值为：Long.MAX_VALUE -->
+		<property name="connectionTimeoutInMs" value="5000" />
+		<!-- 在获取连接失败后的重试次数，默认为5次。 -->
+		<property name="acquireRetryAttempts" value="5" />
+	</bean>
+
+
+	<bean id="mailSender"
+		class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="${mail.smtp.host}"></property>
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtp.auth">${mail.smtp.auth}</prop>
+				<prop key="mail.smtp.timeout">${mail.smtp.timeout}</prop>
+			</props>
+		</property>
+		<property name="username" value="${mail.username}" />
+		<property name="password" value="${mail.password}" />
+		<property name="defaultEncoding"
+			value="${mail.defaultEncoding}" />
+	</bean>
+	<bean id="freeMarker"
+		class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="templateLoaderPath"
+			value="${freeMarker.templateLoaderPath}" />
+		<!--指定模板文件目录 -->
+		<!-- 设置FreeMarker环境属性 -->
+		<property name="freemarkerSettings">
+			<props>
+				<!--刷新模板的周期，单位为秒 -->
+				<prop key="template_update_delay">${freeMarker.template_update_delay}</prop>
+				<!--模板的编码格式 -->
+				<prop key="defaultEncoding">${freeMarker.defaultEncoding}</prop>
+				<!-- 本地化设置 -->
+				<prop key="locale">${freeMarker.locale}</prop>
+			</props>
+		</property>
+	</bean>
+
+	 <!--线程池配置-->
+	<bean id="threadPool"
+		class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<!-- 核心线程数 -->
+		<property name="corePoolSize" value="10" />
+		<!-- 最大线程数 -->
+		<property name="maxPoolSize" value="50" />
+		<!-- 队列最大长度 -->
+		<property name="queueCapacity" value="1000" />
+		<!-- 线程池维护线程所允许的空闲时间 -->
+		<property name="keepAliveSeconds" value="300" />
+		<!-- 线程池对拒绝任务(无线程可用)的处理策略 -->
+		<property name="rejectedExecutionHandler">
+			<bean
+				class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy" />
+		</property>
+	</bean>
+
+
+    <bean id="modbusLogProcessBean"
+          class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <ref bean="modbusLogProcessJob" />
+        </property>
+        <property name="targetMethod" value="doJob" />
+        <property name="concurrent" value="false" />
+        <!-- 作业不并发调度 -->
+    </bean>
+
+    <bean id="modbusLogProcessJobCronTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="modbusLogProcessBean" />
+        <!-- 测试 每5秒钟执行一次  测试 0/5 * * * * ?-->
+        <property name="cronExpression" value="0/5 * * * * ?" />
+    </bean>
+
+    <bean
+            class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+               <!-- <ref bean="modbusLogProcessJobCronTrigger" />-->
+            </list>
+        </property>
+    </bean>
+
+</beans>

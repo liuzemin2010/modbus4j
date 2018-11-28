@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="modbus4j:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="modbus4j-0.0.1-SNAPSHOT.war">
+      <element id="artifact" artifact-name="modbus4j:war exploded" />
+    </root>
+  </artifact>
+</component>

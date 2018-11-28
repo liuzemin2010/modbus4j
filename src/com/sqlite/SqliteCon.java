@@ -67,8 +67,10 @@ public class SqliteCon {
     public static void main(String[] args) {
         //testHelper();
     	//插入初始指令数据
-    	testInsertOrder();
+//    	testInsertOrder();
+        testInsertOrder2();
     }
+
     public static void testInsertOrder() {
     	int start = 1;
 		
@@ -125,5 +127,17 @@ public class SqliteCon {
         
         
         
+    }
+
+    public static void testInsertOrder2() {
+        try {
+            SqliteHelper h = new SqliteHelper("resources\\db\\modbus4j.db");
+            String sql = "INSERT INTO modbus_protocol_basic(ip,PORT,time_out,retries) VALUES('10.7.20.252',8899,2000,3)";
+            h.executeUpdate(sql);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -41,7 +41,7 @@ public class ModbusController {
     @Inject
     private ModbusLogService modbusLogService;
 
-    @RequestMapping(value = { "/readCommand" })
+    @RequestMapping(value = {"/readCommand"})
     @ResponseBody
     public JSONObject readCommand(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
@@ -52,74 +52,64 @@ public class ModbusController {
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-        jsonObject.put("date",sdf.format(date));
-        jsonObject.put("deviceCode",deviceCode);
-        if(StringUtils.isEmpty(deviceCode)){
-            jsonObject.put("code","-1");//参数为空
-            jsonObject.put("msg","deviceCodes为空");
+        jsonObject.put("date", sdf.format(date));
+        jsonObject.put("deviceCode", deviceCode);
+        if (StringUtils.isEmpty(deviceCode)) {
+            jsonObject.put("code", "-1");//参数为空
+            jsonObject.put("msg", "deviceCodes为空");
             log.info("readCommand deviceCodes为空");
             return jsonObject;
         }
         //根据deviceCode查询modbus信息
         List<ModbusCommandDto> modbusCommandDtoList = modbusBusinessCommandService.queryByDeviceCodes(deviceCode);
-        if(modbusCommandDtoList==null||modbusCommandDtoList.size()==0){
-            jsonObject.put("code","-1");//参数为空
-            jsonObject.put("msg","deviceCodes  "+deviceCode+" 不存在");
-            log.info("readCommand deviceCodes  "+deviceCode+" 不存在");
+        if (modbusCommandDtoList == null || modbusCommandDtoList.size() == 0) {
+            jsonObject.put("code", "-1");//参数为空
+            jsonObject.put("msg", "deviceCodes  " + deviceCode + " 不存在");
+            log.info("readCommand deviceCodes  " + deviceCode + " 不存在");
             return jsonObject;
         }
         JSONArray tempJsonArray = new JSONArray();
-        for(int i=0;i<modbusCommandDtoList.size();i++){
+        for (int i = 0; i < modbusCommandDtoList.size(); i++) {
             String ip = modbusCommandDtoList.get(i).getIp();
             Integer port = modbusCommandDtoList.get(i).getPorts();
             Integer timeout = modbusCommandDtoList.get(i).getTime_out();
             Integer retries = modbusCommandDtoList.get(i).getRetries();
-            CommandEnum[] commandEnums = CommandEnum.values();
             JSONObject tempJson = new JSONObject();
             ModbusLog modbusLog = new ModbusLog();
             modbusLog.setName("readCommand");
             modbusLog.setCreate_time(sdf.format(date));
             String strArr[] = deviceCode.split(",");
-            tempJson.put("deviceCode",strArr[i]);
+            tempJson.put("deviceCode", strArr[i]);
             modbusLog.setParams_in(strArr[i]);
-
-           for(CommandEnum commandEnum : commandEnums) {
-                String businessCode = commandEnum.getBusinessCode();
-                int registerAddress = CommandEnum.getValueByKey(businessCode);
-                //JSONObject retJsonObject = ModbusUtils.readCommand(ip, port, timeout,  retries,  modbusCommandDtoList.get(i).getDevice_no(),
-                        //registerAddress);
-
-               JSONObject retJsonObject = ModbusUtils.batchRead(ip, port, timeout,  retries,
-                       modbusCommandDtoList.get(i).getDevice_no());
-
-                Iterator<String> it = retJsonObject.keys();
-
-                while(it.hasNext()){
-                    String key = it.next();
-                    String value = retJsonObject.getString(key);
-                    if(key.equals("nowTemp")){
-                        Double dValue =   Double.valueOf(value);
-                        value = Double.toString(dValue/100);
-                    }
-                    tempJson.put(key,value);
+            // 执行批量读取命令
+            JSONObject retJsonObject = ModbusUtils.batchRead(ip, port, timeout, retries,
+                    modbusCommandDtoList.get(i).getDevice_no());
+            Iterator<String> it = retJsonObject.keys();
+            while (it.hasNext()) {
+                String key = it.next();
+                String value = retJsonObject.getString(key);
+                if (key.equals("nowTemp")) {
+                    Double dValue = Double.valueOf(value);
+                    value = Double.toString(dValue / 100);
                 }
+                tempJson.put(key, value);
             }
             modbusLog.setStatus("success");
             tempJsonArray.add(tempJson);
             modbusLog.setParams_out(tempJson.toString());
-            log.info(" readCommand 返回的信息如下 "+tempJsonArray);
+            log.info(" readCommand 返回的信息如下 " + tempJsonArray);
             modbusLogService.save(modbusLog);
         }
 
-        jsonObject.put("data",tempJsonArray);
-        jsonObject.put("code","0000");
-        jsonObject.put("msg","命令执行成功,正确返回");
+        jsonObject.put("data", tempJsonArray);
+        jsonObject.put("code", "0000");
+        jsonObject.put("msg", "命令执行成功,正确返回");
         return jsonObject;
     }
 
-    @RequestMapping(value = { "/writeCommand" })
+    @RequestMapping(value = {"/writeCommand"})
     @ResponseBody
-    public JSONObject writeCommand( HttpServletRequest request,HttpServletResponse  response) throws Exception {
+    public JSONObject writeCommand(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         JSONObject jsonObject = new JSONObject();
         String businessCode = request.getParameter("businessCode");
@@ -128,26 +118,26 @@ public class ModbusController {
 
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        jsonObject.put("date",sdf.format(date));
-        jsonObject.put("deviceCode",deviceCode);
+        jsonObject.put("date", sdf.format(date));
+        jsonObject.put("deviceCode", deviceCode);
 
-       if(StringUtils.isEmpty(businessCode)){
-            jsonObject.put("code","-1");//参数为空
-            jsonObject.put("msg","businessCode为空");
+        if (StringUtils.isEmpty(businessCode)) {
+            jsonObject.put("code", "-1");//参数为空
+            jsonObject.put("msg", "businessCode为空");
             log.info("writeCommand  businessCode为空");
             return jsonObject;
         }
 
-        if(StringUtils.isEmpty(deviceCode)){
-            jsonObject.put("code","-1");//参数为空
-            jsonObject.put("msg","deviceCode为空");
+        if (StringUtils.isEmpty(deviceCode)) {
+            jsonObject.put("code", "-1");//参数为空
+            jsonObject.put("msg", "deviceCode为空");
             log.info("writeCommand  deviceCode为空");
             return jsonObject;
         }
 
-        if(StringUtils.isEmpty(commandValue)){
-            jsonObject.put("code","-1");//参数为空
-            jsonObject.put("msg","commandValue为空");
+        if (StringUtils.isEmpty(commandValue)) {
+            jsonObject.put("code", "-1");//参数为空
+            jsonObject.put("msg", "commandValue为空");
             log.info("writeCommand  commandValue为空");
             return jsonObject;
         }
@@ -155,51 +145,50 @@ public class ModbusController {
         //根据deviceCode查询modbus信息
         //ModbusBusinessCommand modbusBusinessCommand = modbusBusinessCommandService.queryByBusinessCodeAndDeviceCode(businessCode,deviceCode);
         ModbusBusinessCommand modbusBusinessCommand = modbusBusinessCommandService.getByDeviceCode(deviceCode);
-        if(modbusBusinessCommand==null){
-            jsonObject.put("code","-1");//参数为空
-            jsonObject.put("msg","deviceCode  "+deviceCode+" 或者 businessCode "+ businessCode +" 不存在");
-            log.info("writeCommand  "+"deviceCode  "+deviceCode+" 或者 businessCode "+ businessCode +" 不存在");
+        if (modbusBusinessCommand == null) {
+            jsonObject.put("code", "-1");//参数为空
+            jsonObject.put("msg", "deviceCode  " + deviceCode + " 或者 businessCode " + businessCode + " 不存在");
+            log.info("writeCommand  " + "deviceCode  " + deviceCode + " 或者 businessCode " + businessCode + " 不存在");
             return jsonObject;
         }
         ModbusProtocolBasic modbusProtocolBasic = modbusProtocolBasicService.findById(modbusBusinessCommand.getModbusProtocolBasicId());
         JSONObject commandObject = new JSONObject();
-        commandObject.put("ip",modbusProtocolBasic.getIp());
-        commandObject.put("port",modbusProtocolBasic.getPort());
-        JSONArray jsonArray = new JSONArray();
+        commandObject.put("ip", modbusProtocolBasic.getIp());
+        commandObject.put("port", modbusProtocolBasic.getPort());
         String ip = modbusProtocolBasic.getIp();
         Integer port = modbusProtocolBasic.getPort();
         Integer timeout = modbusProtocolBasic.getTimeOut();
         Integer retries = modbusProtocolBasic.getRetries();
-        JSONObject retJsonObject = ModbusUtils.writeCommand(ip, port, timeout, retries,  modbusBusinessCommand.getDeviceNo(),
+        JSONObject retJsonObject = ModbusUtils.writeCommand(ip, port, timeout, retries, modbusBusinessCommand.getDeviceNo(),
                 CommandEnum.getValueByKey(businessCode), Integer.parseInt(commandValue));
 
         ModbusLog modbusLog = new ModbusLog();
         modbusLog.setCreate_time(sdf.format(date));
         modbusLog.setName("writeCommand");
         JSONObject object = new JSONObject();
-        object.put("businessCode",businessCode);
-        object.put("deviceCode",deviceCode);
-        object.put("commandValue",commandValue);
+        object.put("businessCode", businessCode);
+        object.put("deviceCode", deviceCode);
+        object.put("commandValue", commandValue);
         modbusLog.setParams_in(object.toString());
         modbusLog.setDevice_code(deviceCode);
         modbusLog.setBusiness_code(businessCode);
         modbusLog.setBusiness_value(commandValue);
         //modbusLog.setBusiness_name();
         //modbusLog.setParams_out();
-        if("true".equals(retJsonObject.get("success").toString())){
-            jsonObject.put("code","0000");
-            jsonObject.put("msg","命令执行成功,正确返回");
+        if ("true".equals(retJsonObject.get("success").toString())) {
+            jsonObject.put("code", "0000");
+            jsonObject.put("msg", "命令执行成功,正确返回");
             log.info("writeCommand 命令执行成功,正确返回 ");
             modbusLog.setStatus("success");
-        }else{
-            jsonObject.put("code","9999");
-            jsonObject.put("msg","命令发送三次失败");
+        } else {
+            jsonObject.put("code", "9999");
+            jsonObject.put("msg", "命令发送三次失败");
             log.info("writeCommand 命令发送三次失败");
             modbusLog.setStatus("failure");
         }
-        commandObject.put("registerAddress",CommandEnum.getValueByKey(businessCode));
-        commandObject.put("commandValue",commandValue);
-        jsonObject.put("command",commandObject);
+        commandObject.put("registerAddress", CommandEnum.getValueByKey(businessCode));
+        commandObject.put("commandValue", commandValue);
+        jsonObject.put("command", commandObject);
         modbusLogService.save(modbusLog);
         return jsonObject;
     }
@@ -217,7 +206,7 @@ public class ModbusController {
             sbf.append("VALUES ");
             sbf.append("	('11', '21', '31', '41', '51', '16', '17', '18', '19'); ");
             h.executeUpdate(sbf.toString());
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

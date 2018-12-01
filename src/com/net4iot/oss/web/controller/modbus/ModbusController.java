@@ -8,6 +8,7 @@ import com.net4iot.oss.domain.service.modbus.ModbusBusinessCommandService;
 import com.net4iot.oss.domain.service.modbus.ModbusLogService;
 import com.net4iot.oss.domain.service.modbus.ModbusProtocolBasicService;
 import com.net4iot.oss.infra.constants.CommandEnum;
+import com.net4iot.oss.modbus4j.sero.messaging.WaitingRoomException;
 import com.net4iot.oss.service.modbus.ModbusUtils;
 import com.sqlite.SqliteHelper;
 import net.sf.json.JSONArray;
@@ -206,6 +207,12 @@ public class ModbusController {
                 log.info("writeCommand 命令发送三次失败");
                 modbusLog.setStatus("failure");
             }
+        }catch (WaitingRoomException e){
+            e.printStackTrace();
+            modbusLog.setStatus("failure");
+            modbusLog.setExceptions_info(e.toString());
+            jsonObject.put("code", "9999");
+            jsonObject.put("msg", "命令发送三次失败");
         }catch (Exception e){
             e.printStackTrace();
             modbusLog.setStatus("failure");

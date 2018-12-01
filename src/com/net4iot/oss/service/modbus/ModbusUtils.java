@@ -14,6 +14,7 @@ import com.net4iot.oss.modbus4j.locator.BaseLocator;
 import com.net4iot.oss.modbus4j.locator.NumericLocator;
 import com.net4iot.oss.modbus4j.msg.WriteRegisterRequest;
 import com.net4iot.oss.modbus4j.msg.WriteRegisterResponse;
+import com.net4iot.oss.modbus4j.sero.messaging.WaitingRoomException;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
@@ -91,7 +92,7 @@ public class ModbusUtils {
 
     // //int writeSlaveId, int writeOffset, int writeValue
     public static JSONObject writeCommand(String ip, Integer port, Integer timeout, Integer retries, Integer writeSlaveId, Integer writeOffset,
-                                          Integer writeValue) throws Exception{
+                                          Integer writeValue) throws WaitingRoomException , Exception{
         JSONObject jsonObject = new JSONObject();
         ModbusFactory factory = new ModbusFactory();
         IpParameters params = new IpParameters();

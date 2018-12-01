@@ -31,6 +31,9 @@ public class ModbusLog extends IdEntity {
     @Column(name = "params_out")
     private String params_out;
 
+    @Column(name = "exceptions_info")
+    private String exceptions_info;
+
     @Column(name = "status")
     private String status;
 
@@ -107,5 +110,13 @@ public class ModbusLog extends IdEntity {
 
     public void setBusiness_name(String business_name) {
         this.business_name = business_name;
+    }
+
+    public String getExceptions_info() {
+        return exceptions_info;
+    }
+
+    public void setExceptions_info(String exceptions_info) {
+        this.exceptions_info = exceptions_info;
     }
 }

@@ -12,4 +12,8 @@ public class ModbusLogService extends AbstractService {
     public List<ModbusLog> queryBydateDiff(String dateDiff) {
         return this.find("from ModbusLog where create_time <", dateDiff);
     }
+
+    public ModbusLog findById(Long id) {
+        return this.findUnique("from  ModbusLog where id =?", id);
+    }
 }

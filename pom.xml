@@ -13,13 +13,22 @@
 			<version>3.1.0</version>
 		</dependency>
 
-		<!-- spring start -->
+		<!-- spring start-->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>3.1.0.RELEASE</version>
 		</dependency>
-		<dependency>
+
+      <!-- https://mvnrepository.com/artifact/org.springframework/spring-core
+      <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-core</artifactId>
+          <version>4.3.12.RELEASE</version>
+      </dependency>-->
+
+
+      <dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
 			<version>3.1.0.RELEASE</version>

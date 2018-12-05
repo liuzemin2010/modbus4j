@@ -135,10 +135,10 @@
         <!-- 作业不并发调度 -->
     </bean>
 
-    <bean id="modbusLogProcessJobCronTrigger"
+   <!-- <bean id="modbusLogProcessJobCronTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="modbusLogProcessBean" />
-        <!-- 测试 每5秒钟执行一次  测试 0/5 * * * * ?-->
+        &lt;!&ndash; 测试 每5秒钟执行一次  测试 0/5 * * * * ?&ndash;&gt;
         <property name="cronExpression" value="0/5 * * * * ?" />
     </bean>
 
@@ -146,9 +146,9 @@
             class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
-               <!-- <ref bean="modbusLogProcessJobCronTrigger" />-->
+               <ref bean="modbusLogProcessJobCronTrigger" />
             </list>
         </property>
-    </bean>
+    </bean>-->
 
 </beans>

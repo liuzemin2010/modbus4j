@@ -15,6 +15,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -23,6 +24,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -41,6 +43,31 @@ public class ModbusController {
 
     @Inject
     private ModbusLogService modbusLogService;
+
+
+
+    /**
+     * 定时任务，每天晚上0点删除数据日志表中的两天前的所有记录
+     */
+    @Scheduled(cron= "0 0 0 * * ?")
+    public void deleteLog(){
+        log.info("删除日志数据");
+
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date=new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DAY_OF_MONTH, -2);
+        date = calendar.getTime();
+
+         List<ModbusLog> list = modbusLogService.queryBydateDiff(sdf.format(date));
+            if(list!=null&&list.size()>0){
+                for(int i=0;i<list.size();i++){
+                    modbusLogService.delete(list.get(i));
+                }
+            }
+    }
+
 
     @RequestMapping(value = {"/readCommand"})
     @ResponseBody

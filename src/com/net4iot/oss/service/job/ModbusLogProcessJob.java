@@ -1,23 +1,13 @@
 package com.net4iot.oss.service.job;
 
 
-import com.net4iot.oss.domain.model.modbus.ModbusLog;
 import com.net4iot.oss.domain.service.modbus.ModbusLogService;
-import com.net4iot.oss.modbus4j.BatchRead;
-import com.net4iot.oss.modbus4j.BatchResults;
-import com.net4iot.oss.modbus4j.ModbusFactory;
-import com.net4iot.oss.modbus4j.ModbusMaster;
-import com.net4iot.oss.modbus4j.code.DataType;
 import com.net4iot.oss.modbus4j.exception.ErrorResponseException;
 import com.net4iot.oss.modbus4j.exception.ModbusInitException;
 import com.net4iot.oss.modbus4j.exception.ModbusTransportException;
-import com.net4iot.oss.modbus4j.ip.IpParameters;
-import com.net4iot.oss.modbus4j.locator.BaseLocator;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service("modbusLogProcessJob")
 public class ModbusLogProcessJob {
@@ -33,12 +23,12 @@ public class ModbusLogProcessJob {
         log.info("开始执行 ===================ModbusLogProcessJob========doJob======================");
         System.out.println("开始执行 ===================ModbusLogProcessJob========doJob======================");
 
-        List<ModbusLog> list = modbusLogService.queryBydateDiff("2018-11-27 17:48:49");
+        /*List<ModbusLog> list = modbusLogService.queryBydateDiff("2018-11-27 17:48:49");
         if(list!=null&&list.size()>0){
             for(int i=0;i<list.size();i++){
                 modbusLogService.delete(list.get(i));
             }
-        }
+        }*/
     }
 
     /**
@@ -47,7 +37,7 @@ public class ModbusLogProcessJob {
      * @throws ModbusTransportException
      * @throws ErrorResponseException
      * @throws ModbusInitException
-     */
+
     public static void batchRead(String ip, Integer port, Integer deviceNo) throws ModbusTransportException, ErrorResponseException, ModbusInitException {
 
         BatchRead<Integer> batch = new BatchRead<Integer>();
@@ -79,9 +69,9 @@ public class ModbusLogProcessJob {
         System.out.println("85 = " + results.getValue(4));
         System.out.println("264 = " + results.getValue(5));
 
-    }
+    } */
 
     public static void main(String[] args) throws Exception{
-        batchRead("10.7.20.253", 8899, 4);
+        //batchRead("10.7.20.253", 8899, 4);
     }
 }

@@ -111,6 +111,7 @@ public class ModbusController {
             String strArr[] = deviceCode.split(",");
             tempJson.put("deviceCode", strArr[i]);
             modbusLog.setParams_in(strArr[i]);
+            modbusLog.setDevice_code(strArr[i]);
             modbusLog.setParams_out(tempJson.toString());
             //modbusLog.setStatus("success");
             //modbusLogService.save(modbusLog);
